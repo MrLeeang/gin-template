@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"gin-template/pkg/config"
-	"gin-template/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -51,8 +50,6 @@ func ReturnResutl(c *gin.Context, retCode int, msg string, result interface{}) {
 	if config.Config.Server.Encrypt {
 		// 加密返回值
 		byteStr, _ := json.Marshal(result)
-
-		logger.Debug(string(byteStr))
 
 		baseStr, _ := AesEncrypt(byteStr)
 

@@ -7,7 +7,14 @@ import (
 	"encoding/base64"
 )
 
-const aeskey = "gintemplate"
+// aeskey 长度32位， iv 前16位
+// 加密规则
+// CBC
+// PKCS7
+// 256BITS
+// KEY gintemplateabcdefghijklmnopqrstu
+// IV  gintemplateabcde
+const aeskey = "gintemplateabcdefghijklmnopqrstu"
 
 func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize

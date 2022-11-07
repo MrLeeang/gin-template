@@ -11,17 +11,17 @@ import (
 func PermissionHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 
-		// 验证当前api是否需要登录
 		tokenStr := context.Request.Header.Get("Token")
+
 		verify, err := utils.VerifyToken(tokenStr)
 		if err != nil {
-			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "", "")
+			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "", map[string]interface{}{})
 			context.Abort()
 			return
 		}
 
 		if verify.ClientIp != context.ClientIP() {
-			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "错误的accessToken", "")
+			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "错误的accessToken", map[string]interface{}{})
 			context.Abort()
 			return
 		}
@@ -29,7 +29,7 @@ func PermissionHandler() gin.HandlerFunc {
 		user, err := db.QueryUserByUuid(verify.Uid)
 
 		if err != nil { // 获取用户信息失败
-			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "用户不存在", "")
+			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "用户不存在", user)
 			context.Abort()
 			return
 		}

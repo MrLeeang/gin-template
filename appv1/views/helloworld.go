@@ -7,5 +7,5 @@ import (
 )
 
 func ActionHelloWorld(c *gin.Context) {
-	utils.ReturnResutl(c, utils.RetCode.Success, "", map[string]interface{}{})
+	utils.ReturnResutl(c, utils.RetCode.Success, "", map[string]interface{}{"text": "hello world"})
 }
