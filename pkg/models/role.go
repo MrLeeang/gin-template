@@ -9,3 +9,7 @@ type Role struct {
 	Name        string `json:"name" form:"name" gorm:"type:varchar(64);comment:'角色名称'"`
 	DisplayName string `json:"display_name" form:"display_name" gorm:"type:varchar(64);comment:'中文名称，显示名称'"`
 }
+
+func (Role) TableName() string {
+	return "role"
+}

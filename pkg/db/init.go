@@ -43,13 +43,10 @@ func initDb() (*gorm.DB, error) {
 		db.SetLogger(logger.Logger)
 	}
 
-	// 指定表前缀，修改默认表名
-	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return "gintemplate_" + defaultTableName
-	}
-
 	db.AutoMigrate(new(models.User))
 	db.AutoMigrate(new(models.Role))
+	db.AutoMigrate(new(models.User2Role))
+	db.AutoMigrate(new(models.UserLoginLog))
 
 	return db, nil
 }
@@ -57,6 +54,7 @@ func initDb() (*gorm.DB, error) {
 func InitData() {
 
 	adminRoleUuid := utils.GetUuid()
+	userRoleUuid := utils.GetUuid()
 
 	DB.Create(&models.Role{
 		Uuid:        adminRoleUuid,
@@ -65,20 +63,30 @@ func InitData() {
 	})
 
 	DB.Create(&models.Role{
-		Uuid:        utils.GetUuid(),
+		Uuid:        userRoleUuid,
 		Name:        "user",
 		DisplayName: "用户",
 	})
 
 	adminUser := models.User{
-		Uuid:        utils.GetUuid(),
-		Name:        "admin",
-		DisplayName: "管理员",
-		RoleUuid:    adminRoleUuid,
-		Password:    "e10adc3949ba59abbe56e057f20f883e",
+		Uuid:         utils.GetUuid(),
+		Username:     "admin",
+		Name:         "管理员",
+		Password:     "e10adc3949ba59abbe56e057f20f883e",
+		Introduction: "平台管理员",
 	}
 
 	DB.Create(&adminUser)
+
+	DB.Create(&models.User2Role{
+		UserUuid: adminUser.Uuid,
+		RoleUuid: adminRoleUuid,
+	})
+
+	DB.Create(&models.User2Role{
+		UserUuid: adminUser.Uuid,
+		RoleUuid: userRoleUuid,
+	})
 
 }
 

@@ -24,7 +24,7 @@ type jwtCustomClaims struct {
 func GenerateToken(uid, clientIp string) (string, error) {
 	claims := &jwtCustomClaims{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 12).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 8).Unix(),
 			Issuer:    Issuer,
 		},
 		Uid:      uid,

@@ -21,7 +21,7 @@ func PermissionHandler() gin.HandlerFunc {
 		}
 
 		if verify.ClientIp != context.ClientIP() {
-			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "错误的accessToken", map[string]interface{}{})
+			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "错误的Token", map[string]interface{}{})
 			context.Abort()
 			return
 		}
@@ -37,7 +37,7 @@ func PermissionHandler() gin.HandlerFunc {
 		// gin上下文存储context.Keys，verifyMap保存到上下文中
 		verifyMap := map[string]interface{}{}
 		verifyMap["Uid"] = verify.Uid
-		verifyMap["UserName"] = user.Name
+		verifyMap["UserName"] = user.Username
 
 		context.Keys = verifyMap
 
