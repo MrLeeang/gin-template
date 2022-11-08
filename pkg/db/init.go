@@ -135,3 +135,19 @@ func init() {
 	}
 
 }
+
+func Add(model interface{}) error {
+	return DB.Create(model).Error
+}
+
+func Delete(model interface{}, where ...interface{}) error {
+	return DB.Delete(model, where...).Error
+}
+
+func Unscoped(model interface{}, where ...interface{}) error {
+	return DB.Unscoped().Delete(model, where...).Error
+}
+
+func Save(model interface{}) error {
+	return DB.Save(model).Error
+}

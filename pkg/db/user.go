@@ -73,5 +73,9 @@ func ListUsers(params map[string]string, keyword string, page int, size int) (us
 
 	db = db.Find(&data.Users)
 
+	for _, user := range data.Users {
+		DB.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", user.Uuid).Scan(&user.Roles)
+	}
+
 	return data, db.Error
 }

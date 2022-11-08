@@ -79,7 +79,9 @@ func ActionRolePut(c *gin.Context) {
 		return
 	}
 
-	utils.ReturnResutl(c, utils.RetCode.Success, "", jsonData)
+	role, _ = db.QueryRoleByUuid(role.Uuid)
+
+	utils.ReturnResutl(c, utils.RetCode.Success, "", role)
 }
 
 func ActionRolePost(c *gin.Context) {

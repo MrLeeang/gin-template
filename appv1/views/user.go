@@ -162,13 +162,37 @@ func ActionUserPut(c *gin.Context) {
 		return
 	}
 
+	roles, ok := jsonData["roles"].([]interface{})
+
+	if ok {
+		db.Unscoped(&models.User2Role{}, "user_uuid=?", user.Uuid)
+		for _, role := range roles {
+
+			roleUuid, ok := role.(string)
+
+			if !ok || roleUuid == "" {
+				continue
+			}
+			db.Add(
+				&models.User2Role{
+					RoleUuid: roleUuid,
+					UserUuid: user.Uuid,
+				},
+			)
+		}
+	}
+
+	delete(jsonData, "roles")
+
 	err = db.UpdateUser(user.Uuid, jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), jsonData)
 		return
 	}
 
-	utils.ReturnResutl(c, utils.RetCode.Success, "", jsonData)
+	user, _ = db.QueryUserByUuid(user.Uuid)
+
+	utils.ReturnResutl(c, utils.RetCode.Success, "", user)
 }
 
 func ActionUserPost(c *gin.Context) {
@@ -188,6 +212,13 @@ func ActionUserPost(c *gin.Context) {
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), jsonData)
 		return
+	}
+
+	for _, role := range jsonData.Roles {
+		db.Add(models.User2Role{
+			UserUuid: jsonData.Uuid,
+			RoleUuid: role.Uuid,
+		})
 	}
 
 	utils.ReturnResutl(c, utils.RetCode.Success, "", jsonData)
