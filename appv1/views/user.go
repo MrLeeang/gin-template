@@ -124,7 +124,6 @@ func ActionUserList(c *gin.Context) {
 		sizeInt = sizeNum
 	}
 
-	// 获取权限
 	quryMap := map[string]string{}
 
 	userData, err := db.ListUsers(quryMap, keyword, pageInt, sizeInt)
@@ -255,4 +254,42 @@ func ActionUserDelete(c *gin.Context) {
 	}
 
 	utils.ReturnResutl(c, utils.RetCode.Success, "", user)
+}
+
+func ActionUserLoginLog(c *gin.Context) {
+	// 页码
+	page := c.Query("page")
+	// 每页显示数量
+	size := c.Query("size")
+	// 查询字段
+	keyword := c.Query("keyword")
+
+	var pageInt int
+	var sizeInt int
+
+	if page != "" && size != "" {
+		pageNum, err := strconv.Atoi(page)
+		if err != nil {
+			utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), page)
+			return
+		}
+		sizeNum, err := strconv.Atoi(size)
+		if err != nil {
+			utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), size)
+			return
+		}
+		pageInt = pageNum
+		sizeInt = sizeNum
+	}
+
+	quryMap := map[string]string{}
+
+	userData, err := db.ListUserLogs(quryMap, keyword, pageInt, sizeInt)
+
+	if err != nil {
+		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), userData)
+		return
+	}
+
+	utils.ReturnResutl(c, utils.RetCode.Success, "", userData)
 }

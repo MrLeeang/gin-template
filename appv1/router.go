@@ -10,7 +10,6 @@ func MakeRouter(r *gin.Engine) {
 
 	v1 := r.Group("/v1", PermissionHandler())
 
-	r.GET("/", views.ActionHelloWorld)
 	// 登录
 	r.POST("/v1/login", views.ActionLogin)
 	// 退出
@@ -31,4 +30,6 @@ func MakeRouter(r *gin.Engine) {
 	v1.PUT("/user", views.ActionUserPut)
 	v1.POST("/user", views.ActionUserPost)
 	v1.DELETE("/user/:uuid", views.ActionUserDelete)
+	// 操作日志
+	v1.GET("/user/log", views.ActionUserLoginLog)
 }
