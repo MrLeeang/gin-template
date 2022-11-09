@@ -41,6 +41,7 @@ go build
 ## 友情链接
 
 #### - [Element UI 表单设计及代码生成器（可视化表单设计器，一键生成 element 表单）](https://github.com/JakHuang/form-generator/)
+#### - [Gin Web Framework](https://github.com/gin-gonic/gin)
 #### - [vue-admin-better](https://github.com/chuzhixin/vue-admin-better)
 #### - [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 
