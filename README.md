@@ -34,9 +34,11 @@ cd gin-template
 # 安装依赖
 go mod tidy
 # 本地开发 启动项目
-go run main.go
+go run cmd/appv1/main.go
+go run cmd/service/main.go
 # 打包
-go build
+go build -o app cmd/appv1/main.go
+go build -o srv cmd/service/main.go
 ```
 ## 友情链接
 
