@@ -57,8 +57,8 @@ func ReturnResutl(c *gin.Context, retCode int, msg string, result interface{}) {
 	}
 
 	c.JSON(200, gin.H{
-		"data":       result,
-		"error_code": retCode,
-		"message":    msg,
+		"data":    result,
+		"code":    retCode,
+		"message": msg,
 	})
 }
