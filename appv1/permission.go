@@ -11,7 +11,7 @@ import (
 func PermissionHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 
-		tokenStr := context.Request.Header.Get("Token")
+		tokenStr := context.Request.Header.Get("X-Token")
 
 		verify, err := utils.VerifyToken(tokenStr)
 		if err != nil {
