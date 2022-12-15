@@ -22,7 +22,7 @@ var (
 
 	// RetCode RetCode
 	RetCode = RetCodeModel{
-		Success:        0,
+		Success:        20000,
 		ExceptionError: 500,
 		ParamRequired:  1001,
 		NotFoundInfo:   1002,
@@ -32,13 +32,13 @@ var (
 	}
 	// ErrorCodeMessage ErrorCodeMessage
 	ErrorCodeMessage = map[int]string{
-		0:    "SUCCESS",
-		500:  "异常错误",
-		1001: "缺少参数",
-		1002: "资源未找到",
-		1003: "参数错误",
-		1004: "登录失败",
-		1005: "权限验证失败",
+		20000: "SUCCESS",
+		500:   "异常错误",
+		1001:  "缺少参数",
+		1002:  "资源未找到",
+		1003:  "参数错误",
+		1004:  "登录失败",
+		1005:  "权限验证失败",
 	}
 )
 
@@ -59,6 +59,6 @@ func ReturnResutl(c *gin.Context, retCode int, msg string, result interface{}) {
 	c.JSON(200, gin.H{
 		"data":       result,
 		"error_code": retCode,
-		"msg":        msg,
+		"message":    msg,
 	})
 }
