@@ -1,7 +1,7 @@
 package appv1
 
 import (
-	"gin-template/pkg/db"
+	"gin-template/db"
 	"gin-template/pkg/utils"
 
 	"github.com/gin-gonic/gin"

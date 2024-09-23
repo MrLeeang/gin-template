@@ -1,7 +1,7 @@
 package db
 
 import (
-	"gin-template/pkg/models"
+	"gin-template/models"
 )
 
 func QueryUserByUuid(uuid string) (models.User, error) {

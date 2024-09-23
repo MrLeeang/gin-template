@@ -1,8 +1,8 @@
 package views
 
 import (
-	"gin-template/pkg/db"
-	"gin-template/pkg/models"
+	"gin-template/db"
+	"gin-template/models"
 	"gin-template/pkg/utils"
 	"strconv"
 

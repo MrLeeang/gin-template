@@ -26,7 +26,6 @@ func main() {
 		middleware.RateLimit(rate.NewLimiter(rate.Every(time.Millisecond*time.Duration(1000/config.Config.MaxRequest)), 50)),
 	)
 
-	// r.Static("/static", config.Config.UploadDir)
 	r.StaticFS("/static", http.Dir(config.Config.UploadDir))
 
 	appv1.MakeRouter(r)

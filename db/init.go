@@ -2,9 +2,9 @@ package db
 
 import (
 	"fmt"
+	"gin-template/models"
 	"gin-template/pkg/config"
 	"gin-template/pkg/logger"
-	"gin-template/pkg/models"
 	"gin-template/pkg/utils"
 	"strings"
 

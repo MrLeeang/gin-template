@@ -1,6 +1,6 @@
 package db
 
-import "gin-template/pkg/models"
+import "gin-template/models"
 
 func QueryRoleByUuid(uuid string) (models.Role, error) {
 	var role models.Role
