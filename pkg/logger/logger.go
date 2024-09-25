@@ -53,7 +53,6 @@ func logger() *logrus.Logger {
 	logger := logrus.New()
 
 	//设置日志级别
-	//设置日志级别
 	if config.Global.Server.Debug {
 		logger.SetLevel(logrus.DebugLevel)
 	} else {
