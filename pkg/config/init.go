@@ -1,63 +1,46 @@
 package config
 
 import (
-	"gopkg.in/ini.v1"
+	"fmt"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 )
 
-type config struct {
-	Mysql
-	Server
-	Consul
-	Mail
-	Service
-	Alibaba
+type Config struct {
+	Mysql   Mysql   `yaml:"mysql"`
+	Server  Server  `yaml:"server"`
+	Consul  Consul  `yaml:"consul"`
+	Mail    Mail    `yaml:"mail"`
+	Service Service `yaml:"service"`
+	Alibaba Alibaba `yaml:"alibaba"`
 }
 
-var Config = &config{}
+var Global = &Config{}
 
 func init() {
 
-	cfg, err := ini.Load("config.ini")
+	// 设置配置文件名和类型
+	viper.SetConfigName("config") // 不需要文件扩展名
+	viper.SetConfigType("yaml")   // 指定文件类型
+	viper.AddConfigPath(".")      // 设置查找配置文件的路径
 
-	if err != nil {
-		// 从服务器配置路径获取
-		cfg, err = ini.Load("/etc/gin-template/config.ini")
-		if err != nil {
-			panic("Fail to read file: config.ini")
-		}
+	// 读取配置文件
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
 	}
 
-	// mysql
-	Config.Mysql.UserName = cfg.Section("mysql").Key("username").String()
-	Config.Mysql.Password = cfg.Section("mysql").Key("password").String()
-	Config.Mysql.Host = cfg.Section("mysql").Key("host").String()
-	Config.Mysql.Port = cfg.Section("mysql").Key("port").String()
-	Config.Mysql.DBName = cfg.Section("mysql").Key("dbname").String()
+	// 将配置解码到结构体
+	if err := viper.Unmarshal(&Global); err != nil {
+		panic(err)
+	}
 
-	// server
-	Config.Server.ServerPort = cfg.Section("server").Key("serverPort").String()
-	Config.Server.UploadDir = cfg.Section("server").Key("uploadDir").String()
-	Config.Server.MaxRequest, _ = cfg.Section("server").Key("maxRequest").Int64()
-	Config.Server.Debug, _ = cfg.Section("server").Key("debug").Bool()
-	Config.Server.Encrypt, _ = cfg.Section("server").Key("encrypt").Bool()
-
-	// service
-	Config.Service.Address = cfg.Section("service").Key("address").String()
-
-	// consul
-	Config.Consul.Address = cfg.Section("consul").Key("address").String()
-
-	// mail
-	Config.Mail.From = cfg.Section("mail").Key("from").String()
-	Config.Mail.Username = cfg.Section("mail").Key("username").String()
-	Config.Mail.Password = cfg.Section("mail").Key("password").String()
-	Config.Mail.Host = cfg.Section("mail").Key("host").String()
-	Config.Mail.Address = cfg.Section("mail").Key("address").String()
-
-	// alibaba
-	Config.Alibaba.AccessKeyId = cfg.Section("alibaba").Key("accessKeyId").String()
-	Config.Alibaba.AccessKeySecret = cfg.Section("alibaba").Key("accessKeySecret").String()
-	Config.Alibaba.SignName = cfg.Section("alibaba").Key("signName").String()
-	Config.Alibaba.TemplateCode = cfg.Section("alibaba").Key("templateCode").String()
-
+	// 监听配置文件变化
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("配置文件发生变化:", e.Name)
+		if err := viper.Unmarshal(&Global); err != nil {
+			panic(err)
+		}
+	})
 }

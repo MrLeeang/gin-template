@@ -8,8 +8,11 @@ import (
 	"gin-template/pkg/utils"
 	"strings"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	gormlogger "gorm.io/gorm/logger"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var DB *gorm.DB
@@ -17,31 +20,45 @@ var DB *gorm.DB
 func initDb() (*gorm.DB, error) {
 	dbString := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		config.Config.Mysql.UserName,
-		config.Config.Mysql.Password,
-		config.Config.Mysql.Host,
-		config.Config.Mysql.Port,
-		config.Config.Mysql.DBName,
+		config.Global.Mysql.UserName,
+		config.Global.Mysql.Password,
+		config.Global.Mysql.Host,
+		config.Global.Mysql.Port,
+		config.Global.Mysql.DBName,
 	)
 
-	db, err := gorm.Open("mysql", dbString)
+	// 日志级别
+	logLevel := gormlogger.Error
+
+	if config.Global.Server.Debug {
+		logLevel = gormlogger.Info
+	}
+
+	zapLogger := NewZapLogger(logger.Logger)
+	zapLogger.SetAsDefault() // 可选：将 zapgorm2 设置为 GORM 的默认日志记录器
+	zapLogger.LogMode(logLevel)
+
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		DSN:                      dbString,
+		DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
+	}), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true, // 表名禁用复数
+		},
+		Logger: zapLogger,
+	})
 
 	if err != nil {
 		return db, err
 	}
 
-	sqlDb := db.DB()
+	sqlDb, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
 
 	sqlDb.SetMaxIdleConns(100) //设置最大连接数
 	sqlDb.SetMaxOpenConns(20)  //设置最大的空闲连接数
-
-	// 设置全局表名禁用复数
-	db.SingularTable(true)
-
-	if config.Config.Debug {
-		db.LogMode(true)
-		db.SetLogger(logger.Logger)
-	}
 
 	db.AutoMigrate(new(models.User))
 	db.AutoMigrate(new(models.Role))
@@ -87,7 +104,6 @@ func InitData() {
 		UserUuid: adminUser.Uuid,
 		RoleUuid: userRoleUuid,
 	})
-
 }
 
 func init() {
@@ -105,19 +121,27 @@ func init() {
 		// 创建数据库
 		rootstring := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/?charset=utf8",
-			config.Config.Mysql.UserName,
-			config.Config.Mysql.Password,
-			config.Config.Mysql.Host,
-			config.Config.Mysql.Port,
+			config.Global.Mysql.UserName,
+			config.Global.Mysql.Password,
+			config.Global.Mysql.Host,
+			config.Global.Mysql.Port,
 		)
 
-		rootDb, err := gorm.Open("mysql", rootstring)
+		rootDb, err := gorm.Open(mysql.New(mysql.Config{
+			DSN:                      rootstring,
+			DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
+		}), &gorm.Config{
+			NamingStrategy: schema.NamingStrategy{
+				// TablePrefix:   "bc_", // 指定表前缀，修改默认表名
+				SingularTable: true, // 表面禁用复数
+			},
+		})
 
 		if err != nil {
 			panic(err)
 		}
 
-		err = rootDb.Exec("create database " + config.Config.Mysql.DBName).Error
+		err = rootDb.Exec("create database " + config.Global.Mysql.DBName).Error
 
 		if err != nil {
 			panic(err)
@@ -131,7 +155,6 @@ func init() {
 
 		// 初始化数据
 		InitData()
-
 	}
 
 }

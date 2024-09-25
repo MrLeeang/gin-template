@@ -6,7 +6,7 @@ import (
 
 func QueryUserByUuid(uuid string) (models.User, error) {
 	var user models.User
-	if err := DB.First(&user, "uuid=?", uuid).Error; err != nil {
+	if err := DB.Debug().First(&user, "uuid=?", uuid).Error; err != nil {
 		return user, err
 	}
 

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gin-template/pkg/config"
-	log "gin-template/pkg/logger"
+	"gin-template/pkg/logger"
 	pb "gin-template/service/proto"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
@@ -17,13 +17,13 @@ import (
 type SmsService struct{}
 
 func (e *SmsService) Call(ctx context.Context, req *pb.SmsCallRequest, rsp *pb.SmsCallResponse) error {
-	log.Info("Received Service.Call request: %v", req)
+	logger.Infof("Received Service.Call request: %v", req)
 
 	code := req.Code
 	phoneNum := req.PhoneNum
 
-	accessKeyId := config.Config.Alibaba.AccessKeyId
-	accessKeySecret := config.Config.Alibaba.AccessKeySecret
+	accessKeyId := config.Global.Alibaba.AccessKeyId
+	accessKeySecret := config.Global.Alibaba.AccessKeySecret
 
 	client, _err := CreateClient(&accessKeyId, &accessKeySecret)
 	if _err != nil {
@@ -41,8 +41,8 @@ func (e *SmsService) Call(ctx context.Context, req *pb.SmsCallRequest, rsp *pb.S
 	}
 
 	sendSmsRequest := &dysmsapi20170525.SendSmsRequest{
-		SignName:      tea.String(config.Config.Alibaba.SignName),
-		TemplateCode:  tea.String(config.Config.Alibaba.TemplateCode),
+		SignName:      tea.String(config.Global.Alibaba.SignName),
+		TemplateCode:  tea.String(config.Global.Alibaba.TemplateCode),
 		PhoneNumbers:  tea.String(phoneNum),
 		TemplateParam: tea.String(string(bodyByte)),
 	}

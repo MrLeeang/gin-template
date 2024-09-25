@@ -1,5 +1,5 @@
 package config
 
 type Consul struct {
-	Address string
+	Address string `yaml:"address"`
 }

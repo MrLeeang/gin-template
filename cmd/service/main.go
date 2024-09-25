@@ -2,12 +2,12 @@ package main
 
 import (
 	"gin-template/pkg/config"
+	"gin-template/pkg/logger"
 	"gin-template/service/handler"
 	pb "gin-template/service/proto"
 
 	"github.com/go-micro/plugins/v4/registry/consul"
 	"go-micro.dev/v4"
-	log "go-micro.dev/v4/logger"
 	"go-micro.dev/v4/registry"
 )
 
@@ -21,8 +21,8 @@ func main() {
 	srv := micro.NewService(
 		micro.Name(service),
 		micro.Version(version),
-		micro.Address(config.Config.Service.Address),
-		micro.Registry(consul.NewRegistry(registry.Addrs(config.Config.Consul.Address))),
+		micro.Address(config.Global.Service.Address),
+		micro.Registry(consul.NewRegistry(registry.Addrs(config.Global.Consul.Address))),
 	)
 	srv.Init()
 
@@ -33,6 +33,6 @@ func main() {
 
 	// Run service
 	if err := srv.Run(); err != nil {
-		log.Fatal(err)
+		logger.Panicf(err.Error())
 	}
 }

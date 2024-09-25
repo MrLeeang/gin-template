@@ -19,16 +19,21 @@ func main() {
 
 	r := gin.New()
 
+	defer logger.Logger.Sync() // 确保在程序结束时 flush 日志
+
 	r.Use(
-		middleware.GinLogger(),
-		gin.RecoveryWithWriter(logger.Logger.Out),
+		middleware.GinLogger(logger.Logger),
+		middleware.GinRecovery(logger.Logger, true),
 		middleware.Cors(),
-		middleware.RateLimit(rate.NewLimiter(rate.Every(time.Millisecond*time.Duration(1000/config.Config.MaxRequest)), 50)),
+		middleware.RateLimit(rate.NewLimiter(rate.Every(time.Millisecond*time.Duration(1000/config.Global.Server.MaxRequest)), 50)),
 	)
 
-	r.StaticFS("/static", http.Dir(config.Config.UploadDir))
+	r.StaticFS("/static", http.Dir(config.Global.Server.UploadDir))
 
 	appv1.MakeRouter(r)
 
-	_ = r.Run(fmt.Sprintf(":%s", config.Config.Server.ServerPort))
+	logger.Infof("run server success on %s !!!", config.Global.Server.ServerPort)
+
+	_ = r.Run(fmt.Sprintf(":%s", config.Global.Server.ServerPort))
+
 }

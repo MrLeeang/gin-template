@@ -27,7 +27,7 @@ func NewService() *Service {
 	srv := micro.NewService(
 		micro.Name(service),
 		micro.Version(version),
-		micro.Registry(consul.NewRegistry(registry.Addrs(config.Config.Consul.Address))),
+		micro.Registry(consul.NewRegistry(registry.Addrs(config.Global.Consul.Address))),
 	)
 
 	return &Service{

@@ -1,5 +1,5 @@
 package config
 
 type Service struct {
-	Address string
+	Address string `yaml:"address"`
 }

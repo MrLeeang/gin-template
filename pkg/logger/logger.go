@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // MyFormatter MyFormatter
@@ -52,7 +54,7 @@ func logger() *logrus.Logger {
 
 	//设置日志级别
 	//设置日志级别
-	if config.Config.Debug {
+	if config.Global.Server.Debug {
 		logger.SetLevel(logrus.DebugLevel)
 	} else {
 		logger.SetLevel(logrus.InfoLevel)
@@ -78,10 +80,91 @@ func logger() *logrus.Logger {
 }
 
 // Logger 打印日志调用
-var Logger = logger()
+// var Logger = logger()
+
+func newLogger() *zap.Logger {
+
+	// 自定义时间编码器
+	customTimeEncoder := func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+		enc.AppendString(t.Format("2006-01-02 15:04:05"))
+	}
+
+	// 自定义 Encoder 配置
+	encoderConfig := zapcore.EncoderConfig{
+		TimeKey:        "time",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.CapitalColorLevelEncoder, // 大写编码器
+		EncodeTime:     customTimeEncoder,                // ISO8601 时间格式
+		EncodeDuration: zapcore.StringDurationEncoder,    // 字符串时间编码器
+		EncodeCaller:   zapcore.ShortCallerEncoder,       // 完整文件路径编码器
+	}
+
+	// 创建一个文件输出
+	now := time.Now()
+	logFilePath := ""
+	if dir, err := os.Getwd(); err == nil {
+		logFilePath = dir + "/logs/"
+	}
+	if err := os.MkdirAll(logFilePath, 0777); err != nil {
+		fmt.Println(err.Error())
+	}
+	logFileName := now.Format("2006-01-02") + ".log"
+	// 日志文件
+	fileName := path.Join(logFilePath, logFileName)
+	if _, err := os.Stat(fileName); err != nil {
+		if _, err := os.Create(fileName); err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+	// 写入文件
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		fmt.Println("err", err)
+	}
+
+	writer := io.MultiWriter(file, os.Stdout)
+
+	var level zapcore.Level
+	if config.Global.Server.Debug {
+		level = zapcore.DebugLevel
+	} else {
+		level = zapcore.InfoLevel
+		writer = io.MultiWriter(file)
+
+	}
+
+	writeSyncer := zapcore.AddSync(writer)
+
+	// 创建 Core
+	core := zapcore.NewCore(
+		zapcore.NewConsoleEncoder(encoderConfig), // 控制台编码器
+		writeSyncer,                              // 输出到文件
+		level,                                    // 日志级别
+	)
+
+	lg := zap.New(core, zap.AddCaller())
+
+	zap.ReplaceGlobals(lg)
+	return lg
+}
+
+// 创建一个新的 zap logger
+var Logger = newLogger()
+
+// var Logger, _ = zap.NewProduction()
 
 var Info = Logger.Info
+var Infof = Logger.Sugar().Infof
 var Error = Logger.Error
+var Errorf = Logger.Sugar().Errorf
 var Debug = Logger.Debug
+var Debugf = Logger.Sugar().Debugf
 var Warn = Logger.Warn
+var Warnf = Logger.Sugar().Warnf
 var Panic = Logger.Panic
+var Panicf = Logger.Sugar().Panicf

@@ -14,6 +14,9 @@ func PermissionHandler() gin.HandlerFunc {
 		tokenStr := context.Request.Header.Get("X-Token")
 
 		verify, err := utils.VerifyToken(tokenStr)
+
+		db.QueryUserByUuid("174b9fb3-52cf-4858-8501-0d4deea0bdfa")
+
 		if err != nil {
 			utils.ReturnResutl(context, utils.RetCode.VerifyFailed, "", map[string]interface{}{})
 			context.Abort()

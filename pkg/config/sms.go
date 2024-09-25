@@ -1,8 +1,8 @@
 package config
 
 type Alibaba struct {
-	AccessKeyId     string
-	AccessKeySecret string
-	SignName        string
-	TemplateCode    string
+	AccessKeyId     string `yaml:"accessKeyId"`
+	AccessKeySecret string `yaml:"accessKeySecret"`
+	SignName        string `yaml:"signName"`
+	TemplateCode    string `yaml:"templateCode"`
 }

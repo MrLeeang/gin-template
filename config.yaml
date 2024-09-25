@@ -1,0 +1,32 @@
+server:
+  serverPort: 8001
+  uploadDir: upload
+  maxRequest: 100  # 每秒最大访问量
+  debug: false
+  encrypt: false
+
+service:
+  address: localhost:8090
+
+mysql:
+  host: 192.168.2.235
+  port: 3306
+  username: root
+  password: 51elab_mysql
+  dbname: gintemplate
+
+consul:
+  address: localhost:8500
+
+mail:
+  host: smtp.163.com  # 登录地址
+  username: xxx@163.com  # 登录账号
+  password: xxx  # 登录密码
+  address: smtp.163.com:25  # 邮件服务
+  from: xxx@163.com  # 发件人邮箱地址
+
+alibaba:
+  accessKeyId: ""
+  accessKeySecret: ""
+  signName: 阿里云短信测试
+  templateCode: SMS_154950909

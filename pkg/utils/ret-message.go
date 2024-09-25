@@ -47,7 +47,7 @@ func ReturnResutl(c *gin.Context, retCode int, msg string, result interface{}) {
 		msg = ErrorCodeMessage[retCode]
 	}
 
-	if config.Config.Server.Encrypt {
+	if config.Global.Server.Encrypt {
 		// 加密返回值
 		byteStr, _ := json.Marshal(result)
 
