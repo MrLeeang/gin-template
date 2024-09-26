@@ -96,6 +96,8 @@ func InitializeLogger() *zap.Logger {
 
 	zap.ReplaceGlobals(Logger)
 
+	zap.RedirectStdLog(Logger)
+
 	Debug = Logger.Debug
 	Info = Logger.Info
 	Warn = Logger.Warn

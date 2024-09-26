@@ -1,34 +1,31 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"gin-template/pkg/config"
-
-	"github.com/go-micro/plugins/v4/registry/consul"
-	"go-micro.dev/v4"
-	"go-micro.dev/v4/registry"
-
-	pb "gin-template/service/proto"
-)
-
-var (
-	service = "gin.template.service"
-	version = "latest"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
-	srv := micro.NewService(
-		micro.Name(service),
-		micro.Version(version),
-		micro.Registry(consul.NewRegistry(registry.Addrs(config.Global.Consul.Address))),
+
+	logger, _ := zap.NewProduction(
+		zap.AddCaller(),
+		zap.AddStacktrace(zapcore.ErrorLevel),
+		zap.Fields(zap.String("appName", "test-gin")),
 	)
 
-	resp, err := pb.NewService(service, srv.Client()).Call(context.Background(), &pb.CallRequest{Name: "lihongwei"})
+	defer logger.Sync()
 
-	if err != nil {
-		panic(err)
-	}
+	zap.ReplaceGlobals(logger)
 
-	fmt.Println(resp.Msg)
+	gin.SetMode(gin.ReleaseMode)
+
+	r := gin.Default()
+
+	r.GET("/", func(c *gin.Context) {
+		logger.Sugar().Infof("hello world")
+		c.JSON(200, map[string]interface{}{"Hello": "World"})
+	})
+
+	r.Run(":8080")
 }
