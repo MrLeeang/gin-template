@@ -2,7 +2,7 @@ server:
   serverPort: 8001
   uploadDir: upload
   maxRequest: 100  # 每秒最大访问量
-  debug: false
+  debug: true
   encrypt: false
 
 service:
@@ -16,7 +16,7 @@ mysql:
   dbname: gintemplate
 
 consul:
-  address: localhost:8500
+  address: 192.168.2.235:8500
 
 mail:
   host: smtp.163.com  # 登录地址

@@ -4,21 +4,21 @@ import "gin-template/models"
 
 func QueryRoleByUuid(uuid string) (models.Role, error) {
 	var role models.Role
-	err := DB.First(&role, "uuid=?", uuid).Error
+	err := Session.First(&role, "uuid=?", uuid).Error
 
 	return role, err
 }
 
 func DeleteRoleByUuid(uuid string) error {
-	return DB.Delete(&models.Role{}, "uuid=?", uuid).Error
+	return Session.Delete(&models.Role{}, "uuid=?", uuid).Error
 }
 
 func AddRole(role models.Role) error {
-	return DB.Create(&role).Error
+	return Session.Create(&role).Error
 }
 
 func UpdateRole(uuid string, jsonData map[string]interface{}) error {
-	return DB.Model(&models.Role{}).Where("uuid=?", uuid).Updates(jsonData).Error
+	return Session.Model(&models.Role{}).Where("uuid=?", uuid).Updates(jsonData).Error
 }
 
 type roleData struct {
@@ -35,7 +35,7 @@ func ListRoles(params map[string]string, keyword string, page int, size int) (ro
 		Size: size,
 	}
 
-	db := DB.Where("id>?", 0)
+	db := Session.Where("id>?", 0)
 
 	// 多字段查询
 	for key, value := range params {

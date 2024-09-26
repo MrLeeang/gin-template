@@ -7,7 +7,6 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/satori/go.uuid v1.2.0
-	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/time v0.5.0
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/ini.v1 v1.67.0 // indirect

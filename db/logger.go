@@ -26,9 +26,9 @@ type Logger struct {
 	Context                   ContextFn
 }
 
-func NewZapLogger(zapLogger *zap.Logger) Logger {
+func NewZapLogger() Logger {
 	return Logger{
-		ZapLogger:                 zapLogger,
+		ZapLogger:                 zap.L(),
 		LogLevel:                  gormlogger.Warn,
 		SlowThreshold:             100 * time.Millisecond,
 		SkipCallerLookup:          false,

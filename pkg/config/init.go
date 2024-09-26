@@ -1,9 +1,6 @@
 package config
 
 import (
-	"fmt"
-
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -16,7 +13,8 @@ type Config struct {
 	Alibaba Alibaba `yaml:"alibaba"`
 }
 
-var Global = &Config{}
+
+var	Global = &Config{}
 
 func init() {
 
@@ -35,12 +33,4 @@ func init() {
 		panic(err)
 	}
 
-	// 监听配置文件变化
-	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("配置文件发生变化:", e.Name)
-		if err := viper.Unmarshal(&Global); err != nil {
-			panic(err)
-		}
-	})
 }

@@ -17,13 +17,22 @@ var (
 )
 
 func main() {
+
+	// 初始化zaplogger
+	logger.InitializeLogger()
+
+	defer logger.Logger.Sync() // 确保在程序结束时 flush 日志
 	// Create service
 	srv := micro.NewService(
 		micro.Name(service),
 		micro.Version(version),
-		micro.Address(config.Global.Service.Address),
 		micro.Registry(consul.NewRegistry(registry.Addrs(config.Global.Consul.Address))),
 	)
+
+	if config.Global.Service.Address != "" {
+		srv.Init(micro.Address(config.Global.Service.Address))
+	}
+
 	srv.Init()
 
 	// Register handler
@@ -31,8 +40,10 @@ func main() {
 	pb.RegisterMailServiceHandler(srv.Server(), new(handler.MailService))
 	pb.RegisterSmsServiceHandler(srv.Server(), new(handler.SmsService))
 
+	logger.Infof("run server success on %s !!!", config.Global.Service.Address)
+
 	// Run service
 	if err := srv.Run(); err != nil {
-		logger.Panicf(err.Error())
+		panic(err.Error())
 	}
 }

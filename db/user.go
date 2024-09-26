@@ -6,43 +6,43 @@ import (
 
 func QueryUserByUuid(uuid string) (models.User, error) {
 	var user models.User
-	if err := DB.Debug().First(&user, "uuid=?", uuid).Error; err != nil {
+	if err := Session.Debug().First(&user, "uuid=?", uuid).Error; err != nil {
 		return user, err
 	}
 
-	err := DB.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", uuid).Scan(&user.Roles).Error
+	err := Session.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", uuid).Scan(&user.Roles).Error
 
 	return user, err
 }
 
 func QueryUserByUsername(username string) (models.User, error) {
 	var user models.User
-	err := DB.First(&user, "username=?", username).Error
+	err := Session.First(&user, "username=?", username).Error
 	return user, err
 }
 
 func AddUserLoginLog(log models.UserLoginLog) error {
-	return DB.Create(&log).Error
+	return Session.Create(&log).Error
 }
 
 func DeleteUserByUuid(uuid string) error {
 
-	if err := DB.Delete(&models.User2Role{}, "user_uuid=?", uuid).Error; err != nil {
+	if err := Session.Delete(&models.User2Role{}, "user_uuid=?", uuid).Error; err != nil {
 		return err
 	}
-	if err := DB.Delete(&models.UserLoginLog{}, "user_uuid=?", uuid).Error; err != nil {
+	if err := Session.Delete(&models.UserLoginLog{}, "user_uuid=?", uuid).Error; err != nil {
 		return err
 	}
 
-	return DB.Delete(&models.User{}, "uuid=?", uuid).Error
+	return Session.Delete(&models.User{}, "uuid=?", uuid).Error
 }
 
 func AddUser(user models.User) error {
-	return DB.Create(&user).Error
+	return Session.Create(&user).Error
 }
 
 func UpdateUser(uuid string, jsonData map[string]interface{}) error {
-	return DB.Model(&models.User{}).Where("uuid=?", uuid).Updates(jsonData).Error
+	return Session.Model(&models.User{}).Where("uuid=?", uuid).Updates(jsonData).Error
 }
 
 type userData struct {
@@ -59,7 +59,7 @@ func ListUsers(params map[string]string, keyword string, page int, size int) (us
 		Size: size,
 	}
 
-	db := DB.Where("id>?", 0)
+	db := Session.Where("id>?", 0)
 
 	// 多字段查询
 	for key, value := range params {
@@ -82,7 +82,7 @@ func ListUsers(params map[string]string, keyword string, page int, size int) (us
 	db = db.Find(&data.Users)
 
 	for _, user := range data.Users {
-		DB.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", user.Uuid).Scan(&user.Roles)
+		Session.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", user.Uuid).Scan(&user.Roles)
 	}
 
 	return data, db.Error
@@ -102,7 +102,7 @@ func ListUserLogs(params map[string]string, keyword string, page int, size int) 
 		Size: size,
 	}
 
-	db := DB.Where("id>?", 0)
+	db := Session.Where("id>?", 0)
 
 	// 多字段查询
 	for key, value := range params {

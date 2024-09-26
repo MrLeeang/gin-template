@@ -3,37 +3,32 @@ package main
 import (
 	"context"
 	"fmt"
-	"sync"
+	"gin-template/pkg/config"
 
-	"time"
+	"github.com/go-micro/plugins/v4/registry/consul"
+	"go-micro.dev/v4"
+	"go-micro.dev/v4/registry"
+
+	pb "gin-template/service/proto"
 )
 
-// context.WithTimeout
-
-var wg sync.WaitGroup
-
-func worker(ctx context.Context) {
-LOOP:
-	for {
-		fmt.Println("db connecting ...")
-		time.Sleep(time.Millisecond * 10) // 假设正常连接数据库耗时10毫秒
-		select {
-		case <-ctx.Done(): // 50毫秒后自动调用
-			break LOOP
-		default:
-		}
-	}
-	fmt.Println("worker done!")
-	wg.Done()
-}
+var (
+	service = "gin.template.service"
+	version = "latest"
+)
 
 func main() {
-	// 设置一个50毫秒的超时
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*50)
-	defer cancel() // 通知子goroutine结束
-	wg.Add(1)
-	go worker(ctx)
-	wg.Wait()
+	srv := micro.NewService(
+		micro.Name(service),
+		micro.Version(version),
+		micro.Registry(consul.NewRegistry(registry.Addrs(config.Global.Consul.Address))),
+	)
 
-	fmt.Println("over")
+	resp, err := pb.NewService(service, srv.Client()).Call(context.Background(), &pb.CallRequest{Name: "lihongwei"})
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(resp.Msg)
 }
