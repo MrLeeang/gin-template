@@ -50,57 +50,40 @@ go build -o srv cmd/service/main.go
 ## gin-template golang学习交流群-377948518
 不管您加或者不加，您都可以享受到开源的代码，感谢您的支持和信任
 
-## config.ini 配置
+## config.yaml 配置
 ```
-[server]
-; 服务端口
-serverPort=8001
-; 文件上传目录
-uploadDir=upload
-; 每秒最大访问量
-maxRequest=100
-; debug开关
-debug=false
-; 接口加密，返回值加密
-encrypt=false
+server:
+  serverPort: 8001 # 服务端口
+  uploadDir: upload # 文件上传目录
+  maxRequest: 100  # 每秒最大访问量
+  debug: true # debug开关
+  encrypt: false # 接口加密，返回值加密
 
-[service]
-; 微服务地址
-address=localhost:8090
+service:
+  address: localhost:8090 # 微服务地址
 
-[mysql]
-; 数据库地址
-host=localhost
-; 数据库端口
-port=3306
-; 数据库用户名
-username=root
-; 数据库用户密码
-password=123456
-; 数据库名称
-dbname=gintemplate
+mysql:
+  host: 192.168.2.235
+  port: 3306
+  username: root
+  password: 51elab_mysql
+  dbname: gintemplate
 
-[consul]
-address=localhost:8500
+consul:
+  address: 192.168.2.235:8500
 
-[mail]
-; 登录地址
-host=smtp.163.com
-; 登录账号
-username=xxx@163.com
-; 登录密码
-password=xxx
-; 邮件服务
-address=smtp.163.com:25
-; 发件人邮箱地址
-from=xxx@163.com
+mail:
+  host: smtp.163.com  # 登录地址
+  username: xxx@163.com  # 登录账号
+  password: xxx  # 登录密码
+  address: smtp.163.com:25  # 邮件服务
+  from: xxx@163.com  # 发件人邮箱地址
 
-; 短信服务
-[alibaba]
-accessKeyId=
-accessKeySecret=
-signName=阿里云短信测试
-templateCode=SMS_154950909
+alibaba:
+  accessKeyId: ""
+  accessKeySecret: ""
+  signName: 阿里云短信测试
+  templateCode: SMS_154950909
 ```
 
 ## 付费技术支持
