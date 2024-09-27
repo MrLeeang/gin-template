@@ -1,0 +1,18 @@
+[Unit]
+Description=gin-template
+Documentation=
+After=network.target
+
+[Service]
+WorkingDirectory=/home/gin-template
+ExecStart=/home/gin-template/appv1
+ExecStop=/bin/kill -KILL $MAINPID
+KillMode=control-group
+Restart=always
+RestartSec=3s
+StandardOutput=append:/var/log/appv1.log
+StandardError=append:/var/log/appv1.log
+
+[Install]
+WantedBy=default.target
+
