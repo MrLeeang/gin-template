@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"gin-template/pkg/config"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
@@ -26,8 +27,8 @@ type Logger struct {
 	Context                   ContextFn
 }
 
-func NewZapLogger() Logger {
-	return Logger{
+func NewZapLogger() *Logger {
+	return &Logger{
 		ZapLogger:                 zap.L(),
 		LogLevel:                  gormlogger.Warn,
 		SlowThreshold:             1 * time.Second,
@@ -37,19 +38,13 @@ func NewZapLogger() Logger {
 	}
 }
 
-func (l Logger) SetAsDefault() {
+func (l *Logger) SetAsDefault() {
 	gormlogger.Default = l
 }
 
-func (l Logger) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
-	return Logger{
-		ZapLogger:                 l.ZapLogger,
-		SlowThreshold:             l.SlowThreshold,
-		LogLevel:                  level,
-		SkipCallerLookup:          l.SkipCallerLookup,
-		IgnoreRecordNotFoundError: l.IgnoreRecordNotFoundError,
-		Context:                   l.Context,
-	}
+func (l *Logger) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
+	l.LogLevel = level
+	return l
 }
 
 func (l Logger) Info(ctx context.Context, str string, args ...interface{}) {
@@ -91,9 +86,15 @@ func (l Logger) Trace(ctx context.Context, begin time.Time, fc func() (string, i
 		logger.Warn("[GORM]", zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
 		// logger.Sugar().Warnf("elapsed:%s\trows:%d\tsql:%s", elapsed, rows, sql)
 	case l.LogLevel >= gormlogger.Info:
+		// debug模式，这是为了全局可以打印sql
 		sql, rows := fc()
-		logger.Debug("[GORM]", zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
-		// logger.Sugar().Infof("elapsed:%s\trows:%d\tsql:%s", elapsed, rows, sql)
+		if config.Global.Server.Debug {
+			logger.Debug("[GORM]", zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
+		} else {
+			// 非debug模式下，db.Session.Debug().First(&user)，打印sql语句
+			logger.Info("[GORM]", zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
+		}
+		// logger.Sugar().Debugf("elapsed:%s\trows:%d\tsql:%s", elapsed, rows, sql)
 	}
 }
 

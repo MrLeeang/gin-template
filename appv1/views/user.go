@@ -46,7 +46,7 @@ func ActionLogin(c *gin.Context) {
 		"token": tokenStr,
 	}
 
-	db.AddUserLoginLog(models.UserLoginLog{
+	db.Add(&models.UserLoginLog{
 		UserUuid: user.Uuid,
 		OptType:  "login",
 	})
@@ -64,7 +64,7 @@ func ActionLogout(c *gin.Context) {
 		return
 	}
 
-	db.AddUserLoginLog(models.UserLoginLog{
+	db.Add(&models.UserLoginLog{
 		UserUuid: user.Uuid,
 		OptType:  "logout",
 	})
@@ -207,7 +207,7 @@ func ActionUserPost(c *gin.Context) {
 		jsonData.Uuid = utils.GetUuid()
 	}
 
-	err := db.AddUser(jsonData)
+	err := db.Add(&jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), jsonData)
 		return

@@ -13,6 +13,8 @@ func PermissionHandler() gin.HandlerFunc {
 
 		tokenStr := context.Request.Header.Get("X-Token")
 
+		db.QueryUserByUsername("admin")
+
 		verify, err := utils.VerifyToken(tokenStr)
 
 		if err != nil {

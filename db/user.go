@@ -17,12 +17,8 @@ func QueryUserByUuid(uuid string) (models.User, error) {
 
 func QueryUserByUsername(username string) (models.User, error) {
 	var user models.User
-	err := Session.Debug().First(&user, "username=?", username).Error
+	err := Session.First(&user, "username=?", username).Error
 	return user, err
-}
-
-func AddUserLoginLog(log models.UserLoginLog) error {
-	return Session.Create(&log).Error
 }
 
 func DeleteUserByUuid(uuid string) error {
@@ -35,10 +31,6 @@ func DeleteUserByUuid(uuid string) error {
 	}
 
 	return Session.Delete(&models.User{}, "uuid=?", uuid).Error
-}
-
-func AddUser(user models.User) error {
-	return Session.Create(&user).Error
 }
 
 func UpdateUser(uuid string, jsonData map[string]interface{}) error {

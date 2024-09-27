@@ -33,11 +33,22 @@ func initDb() error {
 		logLevel = gormlogger.Info
 	}
 
+	// gormLogger := gormlogger.New(
+	// 	log.New(os.Stdout, "[GORM] ", log.LstdFlags),
+	// 	gormlogger.Config{
+	// 		SlowThreshold:             2 * time.Second,
+	// 		LogLevel:                  logLevel,
+	// 		IgnoreRecordNotFoundError: true,
+	// 		Colorful:                  true,
+	// 	},
+	// )
+
 	zapLogger := NewZapLogger()
 	zapLogger.SetAsDefault() // 可选：将 zapgorm2 设置为 GORM 的默认日志记录器
 	zapLogger.LogMode(logLevel)
 
 	var err error
+
 	Session, err = gorm.Open(mysql.New(mysql.Config{
 		DSN:                      dbString,
 		DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持

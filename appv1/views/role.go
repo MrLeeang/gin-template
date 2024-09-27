@@ -97,7 +97,7 @@ func ActionRolePost(c *gin.Context) {
 		jsonData.Uuid = utils.GetUuid()
 	}
 
-	err := db.AddRole(jsonData)
+	err := db.Add(&jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), jsonData)
 		return

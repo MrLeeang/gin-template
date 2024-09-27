@@ -13,10 +13,6 @@ func DeleteRoleByUuid(uuid string) error {
 	return Session.Delete(&models.Role{}, "uuid=?", uuid).Error
 }
 
-func AddRole(role models.Role) error {
-	return Session.Create(&role).Error
-}
-
 func UpdateRole(uuid string, jsonData map[string]interface{}) error {
 	return Session.Model(&models.Role{}).Where("uuid=?", uuid).Updates(jsonData).Error
 }
