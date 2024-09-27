@@ -83,7 +83,7 @@ func runServer() {
 
 	// 健康监测
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, "ok")
+		c.JSON(200, map[string]interface{}{"status": "ok"})
 	})
 
 	appv1.MakeRouter(r)
