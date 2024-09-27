@@ -81,6 +81,11 @@ func runServer() {
 
 	r.StaticFS("/static", http.Dir(config.Global.Server.UploadDir))
 
+	// 健康监测
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, "ok")
+	})
+
 	appv1.MakeRouter(r)
 
 	// 启动 HTTP 服务

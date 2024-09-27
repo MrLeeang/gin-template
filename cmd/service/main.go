@@ -22,6 +22,7 @@ func main() {
 	logger.InitializeLogger()
 
 	defer logger.Logger.Sync() // 确保在程序结束时 flush 日志
+
 	// Create service
 	srv := micro.NewService(
 		micro.Name(service),

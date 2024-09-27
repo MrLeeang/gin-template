@@ -6,7 +6,7 @@ import (
 
 func QueryUserByUuid(uuid string) (models.User, error) {
 	var user models.User
-	if err := Session.Debug().First(&user, "uuid=?", uuid).Error; err != nil {
+	if err := Session.First(&user, "uuid=?", uuid).Error; err != nil {
 		return user, err
 	}
 
@@ -17,7 +17,7 @@ func QueryUserByUuid(uuid string) (models.User, error) {
 
 func QueryUserByUsername(username string) (models.User, error) {
 	var user models.User
-	err := Session.First(&user, "username=?", username).Error
+	err := Session.Debug().First(&user, "username=?", username).Error
 	return user, err
 }
 

@@ -7,10 +7,9 @@ import (
 	"gin-template/pkg/utils"
 	"strings"
 
-	gormlogger "gorm.io/gorm/logger"
-
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -28,7 +27,7 @@ func initDb() error {
 	)
 
 	// 日志级别
-	logLevel := gormlogger.Error
+	logLevel := gormlogger.Warn
 
 	if config.Global.Server.Debug {
 		logLevel = gormlogger.Info
@@ -155,6 +154,10 @@ func InitializeDatabase() {
 
 		// 数据库不存在,创建数据库
 		if err := createDb(); err != nil {
+			panic(err)
+		}
+
+		if err := initDb(); err != nil {
 			panic(err)
 		}
 

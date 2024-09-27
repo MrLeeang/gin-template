@@ -1,11 +1,8 @@
 package logger
 
 import (
-	"fmt"
 	"gin-template/pkg/config"
-	"io"
 	"os"
-	"path"
 	"time"
 
 	"go.uber.org/zap"
@@ -49,47 +46,18 @@ func InitializeLogger() *zap.Logger {
 		EncodeCaller:   zapcore.ShortCallerEncoder,       // 完整文件路径编码器
 	}
 
-	// 创建一个文件输出
-	now := time.Now()
-	logFilePath := ""
-	if dir, err := os.Getwd(); err == nil {
-		logFilePath = dir + "/logs/"
-	}
-	if err := os.MkdirAll(logFilePath, 0777); err != nil {
-		fmt.Println(err.Error())
-	}
-	logFileName := now.Format("2006-01-02") + ".log"
-	// 日志文件
-	fileName := path.Join(logFilePath, logFileName)
-	if _, err := os.Stat(fileName); err != nil {
-		if _, err := os.Create(fileName); err != nil {
-			fmt.Println(err.Error())
-		}
-	}
-	// 写入文件
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		fmt.Println("err", err)
-	}
-
-	writer := io.MultiWriter(file, os.Stdout)
-
 	var level zapcore.Level
 	if config.Global.Server.Debug {
 		level = zapcore.DebugLevel
 	} else {
 		level = zapcore.InfoLevel
-		writer = io.MultiWriter(file)
-
 	}
-
-	writeSyncer := zapcore.AddSync(writer)
 
 	// 创建 Core
 	core := zapcore.NewCore(
 		zapcore.NewConsoleEncoder(encoderConfig), // 控制台编码器
-		writeSyncer,                              // 输出到文件
-		level,                                    // 日志级别
+		zapcore.AddSync(os.Stdout),
+		level, // 日志级别
 	)
 
 	Logger = zap.New(core, zap.AddCaller())
