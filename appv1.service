@@ -5,13 +5,13 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/gin-template
-ExecStart=/home/gin-template/appv1
+ExecStart=/home/gin-template/app
 ExecStop=/bin/kill -KILL $MAINPID
 KillMode=control-group
 Restart=always
 RestartSec=3s
-StandardOutput=append:/var/log/appv1.log
-StandardError=append:/var/log/appv1.log
+StandardOutput=append:/var/log/app.log
+StandardError=append:/var/log/app.log
 
 [Install]
 WantedBy=default.target
