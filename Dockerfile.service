@@ -2,13 +2,15 @@ FROM golang:alpine AS builder
 ENV CGO_ENABLED=0 GOOS=linux
 WORKDIR /go/src/server
 RUN apk --update --no-cache add ca-certificates gcc libtool make musl-dev protoc
-COPY Makefile go.mod go.sum ./
-RUN make init && go mod download && go mod tidy
 COPY . .
-RUN make proto build-service
+RUN go env -w GOPROXY=https://goproxy.cn,direct
+RUN go mod tidy && go mod download
+RUN make build-service
 
 FROM scratch
 COPY --from=builder /etc/ssl/certs /etc/ssl/certs
+COPY --from=builder /go/src/server/config.yaml /config.yaml
 COPY --from=builder /go/src/server/service /service
+WORKDIR /
 ENTRYPOINT ["/service"]
 CMD []
