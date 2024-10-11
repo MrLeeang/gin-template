@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"gin-template/pkg/config"
 	"gin-template/pkg/logger"
 	"gin-template/service/handler"
@@ -14,11 +15,18 @@ import (
 var (
 	service = "gin.template.service"
 	version = "latest"
+	debug   bool
 )
 
 func main() {
 
+	flag.BoolVar(&debug, "debug", false, "Open debug mode (default false)")
+
+	flag.Parse()
+
 	config.InitializeConfig()
+
+	config.Global.Debug = debug
 
 	// 初始化zaplogger
 	logger.InitializeLogger()

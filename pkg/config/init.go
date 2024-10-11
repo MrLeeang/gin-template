@@ -11,6 +11,7 @@ type Config struct {
 	Mail    Mail    `yaml:"mail"`
 	Service Service `yaml:"service"`
 	Alibaba Alibaba `yaml:"alibaba"`
+	Debug   bool
 }
 
 var Global = &Config{}

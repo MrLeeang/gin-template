@@ -88,7 +88,7 @@ func (l Logger) Trace(ctx context.Context, begin time.Time, fc func() (string, i
 	case l.LogLevel >= gormlogger.Info:
 		// debug模式，这是为了全局可以打印sql
 		sql, rows := fc()
-		if config.Global.Server.Debug {
+		if config.Global.Debug {
 			logger.Debug("[GORM]", zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
 		} else {
 			// 非debug模式下，db.Session.Debug().First(&user)，打印sql语句

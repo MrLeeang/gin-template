@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"gin-template/appv1"
 	"gin-template/db"
@@ -24,11 +25,18 @@ import (
 var (
 	server       *http.Server
 	changeConfig bool
+	debug        bool
 )
 
 func main() {
 
+	flag.BoolVar(&debug, "debug", false, "Open debug mode (default false)")
+
+	flag.Parse()
+
 	config.InitializeConfig()
+
+	config.Global.Debug = debug
 
 	// 初始化zaplogger
 	logger.InitializeLogger()
@@ -68,7 +76,7 @@ func watchConfig() {
 
 func runServer() {
 
-	if !config.Global.Server.Debug {
+	if !config.Global.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

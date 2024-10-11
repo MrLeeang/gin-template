@@ -29,7 +29,7 @@ func initDb() error {
 	// 日志级别
 	logLevel := gormlogger.Warn
 
-	if config.Global.Server.Debug {
+	if config.Global.Debug {
 		logLevel = gormlogger.Info
 	}
 
