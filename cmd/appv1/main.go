@@ -28,6 +28,8 @@ var (
 
 func main() {
 
+	config.InitializeConfig()
+
 	// 初始化zaplogger
 	logger.InitializeLogger()
 

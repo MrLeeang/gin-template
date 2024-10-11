@@ -13,10 +13,9 @@ type Config struct {
 	Alibaba Alibaba `yaml:"alibaba"`
 }
 
+var Global = &Config{}
 
-var	Global = &Config{}
-
-func init() {
+func InitializeConfig() {
 
 	// 设置配置文件名和类型
 	viper.SetConfigName("config") // 不需要文件扩展名
