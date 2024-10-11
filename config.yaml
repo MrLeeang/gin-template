@@ -2,7 +2,6 @@ server:
   serverPort: 8001
   uploadDir: upload
   maxRequest: 100  # 每秒最大访问量
-  debug: false
   encrypt: false
 
 service:
