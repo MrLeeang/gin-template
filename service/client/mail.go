@@ -6,16 +6,16 @@ import (
 )
 
 type ServiceMailInterface interface {
-	Call(toAddress []string, subject, text string) error
+	Call(ctx context.Context, toAddress []string, subject, text string) error
 }
 
 type ServiceMailApi struct {
 	c pb.MailService
 }
 
-func (srv *ServiceMailApi) Call(toAddress []string, subject, text string) error {
+func (srv *ServiceMailApi) Call(ctx context.Context, toAddress []string, subject, text string) error {
 
-	_, err := srv.c.Call(context.Background(), &pb.MailCallRequest{ToAddress: toAddress, Subject: subject, Text: text})
+	_, err := srv.c.Call(ctx, &pb.MailCallRequest{ToAddress: toAddress, Subject: subject, Text: text})
 
 	return err
 }

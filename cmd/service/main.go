@@ -28,10 +28,9 @@ func main() {
 
 	config.Global.Debug = debug
 
-	// 初始化zaplogger
-	logger.InitializeLogger()
+	log := logger.InitializeZapLogger()
 
-	defer logger.Logger.Sync() // 确保在程序结束时 flush 日志
+	defer log.Sync()
 
 	// Create service
 	srv := micro.NewService(

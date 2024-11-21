@@ -22,7 +22,7 @@ func ActionSendSms(c *gin.Context) {
 	}
 
 	srv := client.NewService()
-	if err := srv.Sms().Call(params.Code, params.PhoneNum); err != nil {
+	if err := srv.Sms().Call(c, params.Code, params.PhoneNum); err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), params)
 		return
 	}

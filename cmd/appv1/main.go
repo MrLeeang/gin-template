@@ -15,17 +15,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 )
 
 var (
-	server       *http.Server
-	changeConfig bool
-	debug        bool
+	server *http.Server
+	debug  bool
 )
 
 func main() {
@@ -38,53 +34,20 @@ func main() {
 
 	config.Global.Debug = debug
 
-	// 初始化zaplogger
-	logger.InitializeLogger()
+	log := logger.InitializeZapLogger()
 
-	defer logger.Logger.Sync() // 确保在程序结束时 flush 日志
+	defer log.Sync()
 
 	db.InitializeDatabase()
 
-	go runServer()
-
-	go watchConfig()
-
-	// 等待系统信号
-	waitForShutdown()
-}
-
-func watchConfig() {
-	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		if changeConfig {
-			return
-		}
-
-		if err := viper.Unmarshal(&config.Global); err != nil {
-			panic(err)
-		}
-
-		changeConfig = true
-
-		restartServer()
-
-		time.AfterFunc(2*time.Second, func() {
-			changeConfig = false
-		})
-	})
-}
-
-func runServer() {
-
-	if !config.Global.Debug {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
 
 	r.Use(
-		middleware.GinLogger(),
-		middleware.GinRecovery(true),
+		middleware.Trace(),
+		middleware.GinLogger(log),
+		middleware.GinRecovery(log, true),
 		middleware.Cors(),
 		middleware.RateLimit(rate.NewLimiter(rate.Every(time.Millisecond*time.Duration(1000/config.Global.Server.MaxRequest)), 50)),
 	)
@@ -106,31 +69,14 @@ func runServer() {
 
 	logger.Infof("run server success on %s !!!", config.Global.Server.ServerPort)
 
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		panic(err)
-	}
-}
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic(err)
+		}
+	}()
 
-func restartServer() {
-
-	logger.Infof("Restarting Server...")
-
-	zap.L().Sync()
-
-	logger.InitializeLogger()
-
-	db.InitializeDatabase()
-
-	// 优雅地关闭当前服务
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		logger.Infof("Server Shutdown Failed:%+v", err)
-	}
-
-	// 重新启动服务
-	go runServer()
+	// 等待系统信号
+	waitForShutdown()
 }
 
 func waitForShutdown() {

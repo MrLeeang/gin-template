@@ -8,12 +8,14 @@ import (
 	"net/smtp"
 
 	"github.com/jordan-wright/email"
+	"go.uber.org/zap"
 )
 
 type MailService struct{}
 
 func (e *MailService) Call(ctx context.Context, req *pb.MailCallRequest, rsp *pb.MailCallResponse) error {
-	logger.Infof("Received Service.Call request: %v", req)
+
+	logger.WithContext(ctx).Info("Received MailService.Call request", zap.Any("data", req))
 
 	em := email.NewEmail()
 	// 设置 sender 发送方 的邮箱 ， 此处可以填写自己的邮箱

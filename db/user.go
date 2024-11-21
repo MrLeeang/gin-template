@@ -1,40 +1,41 @@
 package db
 
 import (
+	"context"
 	"gin-template/models"
 )
 
-func QueryUserByUuid(uuid string) (models.User, error) {
+func QueryUserByUuid(ctx context.Context, uuid string) (models.User, error) {
 	var user models.User
-	if err := Session.First(&user, "uuid=?", uuid).Error; err != nil {
+	if err := Session.WithContext(ctx).First(&user, "uuid=?", uuid).Error; err != nil {
 		return user, err
 	}
 
-	err := Session.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", uuid).Scan(&user.Roles).Error
+	err := Session.WithContext(ctx).Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", uuid).Scan(&user.Roles).Error
 
 	return user, err
 }
 
-func QueryUserByUsername(username string) (models.User, error) {
+func QueryUserByUsername(ctx context.Context, username string) (models.User, error) {
 	var user models.User
-	err := Session.First(&user, "username=?", username).Error
+	err := Session.WithContext(ctx).First(&user, "username=?", username).Error
 	return user, err
 }
 
-func DeleteUserByUuid(uuid string) error {
+func DeleteUserByUuid(ctx context.Context, uuid string) error {
 
-	if err := Session.Delete(&models.User2Role{}, "user_uuid=?", uuid).Error; err != nil {
+	if err := Session.WithContext(ctx).Delete(&models.User2Role{}, "user_uuid=?", uuid).Error; err != nil {
 		return err
 	}
-	if err := Session.Delete(&models.UserLoginLog{}, "user_uuid=?", uuid).Error; err != nil {
+	if err := Session.WithContext(ctx).Delete(&models.UserLoginLog{}, "user_uuid=?", uuid).Error; err != nil {
 		return err
 	}
 
-	return Session.Delete(&models.User{}, "uuid=?", uuid).Error
+	return Session.WithContext(ctx).Delete(&models.User{}, "uuid=?", uuid).Error
 }
 
-func UpdateUser(uuid string, jsonData map[string]interface{}) error {
-	return Session.Model(&models.User{}).Where("uuid=?", uuid).Updates(jsonData).Error
+func UpdateUser(ctx context.Context, uuid string, jsonData map[string]interface{}) error {
+	return Session.WithContext(ctx).Model(&models.User{}).Where("uuid=?", uuid).Updates(jsonData).Error
 }
 
 type userData struct {
@@ -44,14 +45,14 @@ type userData struct {
 	Users []*models.User `json:"users"`
 }
 
-func ListUsers(params map[string]string, keyword string, page int, size int) (userData, error) {
+func ListUsers(ctx context.Context, params map[string]string, keyword string, page int, size int) (userData, error) {
 
 	data := userData{
 		Page: page,
 		Size: size,
 	}
 
-	db := Session.Where("id>?", 0)
+	db := Session.WithContext(ctx).Where("id>?", 0)
 
 	// 多字段查询
 	for key, value := range params {
@@ -74,7 +75,7 @@ func ListUsers(params map[string]string, keyword string, page int, size int) (us
 	db = db.Find(&data.Users)
 
 	for _, user := range data.Users {
-		Session.Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", user.Uuid).Scan(&user.Roles)
+		Session.WithContext(ctx).Model(new(models.Role)).Select("role.uuid,role.name,role.display_name").Joins("left JOIN user_2_role on user_2_role.role_uuid = role.uuid").Where("user_2_role.user_uuid=?", user.Uuid).Scan(&user.Roles)
 	}
 
 	return data, db.Error
@@ -87,14 +88,14 @@ type userLogData struct {
 	Logs  []*models.UserLoginLog `json:"logs"`
 }
 
-func ListUserLogs(params map[string]string, keyword string, page int, size int) (userLogData, error) {
+func ListUserLogs(ctx context.Context, params map[string]string, keyword string, page int, size int) (userLogData, error) {
 
 	data := userLogData{
 		Page: page,
 		Size: size,
 	}
 
-	db := Session.Where("id>?", 0)
+	db := Session.WithContext(ctx).Where("id>?", 0)
 
 	// 多字段查询
 	for key, value := range params {

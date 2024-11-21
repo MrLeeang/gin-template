@@ -1,20 +1,23 @@
 package db
 
-import "gin-template/models"
+import (
+	"context"
+	"gin-template/models"
+)
 
-func QueryRoleByUuid(uuid string) (models.Role, error) {
+func QueryRoleByUuid(ctx context.Context, uuid string) (models.Role, error) {
 	var role models.Role
-	err := Session.First(&role, "uuid=?", uuid).Error
+	err := Session.WithContext(ctx).First(&role, "uuid=?", uuid).Error
 
 	return role, err
 }
 
-func DeleteRoleByUuid(uuid string) error {
-	return Session.Delete(&models.Role{}, "uuid=?", uuid).Error
+func DeleteRoleByUuid(ctx context.Context, uuid string) error {
+	return Session.WithContext(ctx).Delete(&models.Role{}, "uuid=?", uuid).Error
 }
 
-func UpdateRole(uuid string, jsonData map[string]interface{}) error {
-	return Session.Model(&models.Role{}).Where("uuid=?", uuid).Updates(jsonData).Error
+func UpdateRole(ctx context.Context, uuid string, jsonData map[string]interface{}) error {
+	return Session.WithContext(ctx).Model(&models.Role{}).Where("uuid=?", uuid).Updates(jsonData).Error
 }
 
 type roleData struct {
@@ -24,14 +27,14 @@ type roleData struct {
 	Roles []*models.Role `json:"roles"`
 }
 
-func ListRoles(params map[string]string, keyword string, page int, size int) (roleData, error) {
+func ListRoles(ctx context.Context, params map[string]string, keyword string, page int, size int) (roleData, error) {
 
 	data := roleData{
 		Page: page,
 		Size: size,
 	}
 
-	db := Session.Where("id>?", 0)
+	db := Session.WithContext(ctx).Where("id>?", 0)
 
 	// 多字段查询
 	for key, value := range params {

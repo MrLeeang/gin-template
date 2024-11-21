@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"gin-template/pkg/logger"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -13,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func GinLogger() gin.HandlerFunc {
+func GinLogger(log *logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//日志格式
 		start := time.Now()
@@ -21,7 +22,7 @@ func GinLogger() gin.HandlerFunc {
 		query := c.Request.URL.RawQuery
 		c.Next()
 		cost := time.Since(start)
-		zap.L().Info(path,
+		log.WithContext(c).Info(path,
 			zap.Int("status", c.Writer.Status()),
 			zap.String("method", c.Request.Method),
 			zap.String("path", path),
@@ -35,7 +36,7 @@ func GinLogger() gin.HandlerFunc {
 }
 
 // GinRecovery recover掉项目可能出现的panic
-func GinRecovery(stack bool) gin.HandlerFunc {
+func GinRecovery(log *logger.Logger, stack bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -52,7 +53,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					zap.L().Error(c.Request.URL.Path,
+					log.WithContext(c).Error(c.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -66,20 +67,17 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					zap.L().Error("[Recovery from panic]",
+					log.WithContext(c).Error("[Recovery from panic]",
 						zap.Any("error", err),
-						// zap.String("request", string(httpRequest)),
-						// zap.String("stack", string(debug.Stack())),
+						zap.String("request", string(httpRequest)),
+						zap.String("stack", string(debug.Stack())),
 					)
-
-					zap.L().Sugar().Errorf(string(debug.Stack()))
-
 					// zap.L().Sugar().Errorf("[Recovery from panic]: %s\n%s", err, string(debug.Stack()))
 				} else {
 
-					zap.L().Error("[Recovery from panic]",
+					log.WithContext(c).Error("[Recovery from panic]",
 						zap.Any("error", err),
-						// zap.String("request", string(httpRequest)),
+						zap.String("request", string(httpRequest)),
 					)
 
 					// zap.L().Sugar().Errorf("[Recovery from panic]: %s\n%s", err, string(httpRequest))

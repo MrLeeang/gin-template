@@ -23,7 +23,7 @@ func ActionSendMail(c *gin.Context) {
 	}
 
 	srv := client.NewService()
-	if err := srv.Mail().Call(params.ToAddress, params.Subject, params.Text); err != nil {
+	if err := srv.Mail().Call(c, params.ToAddress, params.Subject, params.Text); err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), params)
 		return
 	}

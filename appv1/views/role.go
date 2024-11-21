@@ -38,7 +38,7 @@ func ActionRoleList(c *gin.Context) {
 	// 获取权限
 	quryMap := map[string]string{}
 
-	roleData, err := db.ListRoles(quryMap, keyword, pageInt, sizeInt)
+	roleData, err := db.ListRoles(c, quryMap, keyword, pageInt, sizeInt)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), roleData)
@@ -66,20 +66,20 @@ func ActionRolePut(c *gin.Context) {
 
 	uuidString := uuid.(string)
 
-	role, err := db.QueryRoleByUuid(uuidString)
+	role, err := db.QueryRoleByUuid(c, uuidString)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), jsonData)
 		return
 	}
 
-	err = db.UpdateRole(role.Uuid, jsonData)
+	err = db.UpdateRole(c, role.Uuid, jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), jsonData)
 		return
 	}
 
-	role, _ = db.QueryRoleByUuid(role.Uuid)
+	role, _ = db.QueryRoleByUuid(c, role.Uuid)
 
 	utils.ReturnResutl(c, utils.RetCode.Success, "", role)
 }
@@ -97,7 +97,7 @@ func ActionRolePost(c *gin.Context) {
 		jsonData.Uuid = utils.GetUuid()
 	}
 
-	err := db.Add(&jsonData)
+	err := db.Add(c, &jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), jsonData)
 		return
@@ -109,7 +109,7 @@ func ActionRolePost(c *gin.Context) {
 func ActionRoleQuery(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	role, err := db.QueryRoleByUuid(uuid)
+	role, err := db.QueryRoleByUuid(c, uuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), role)
@@ -122,14 +122,14 @@ func ActionRoleQuery(c *gin.Context) {
 func ActionRoleDelete(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	role, err := db.QueryRoleByUuid(uuid)
+	role, err := db.QueryRoleByUuid(c, uuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), role)
 		return
 	}
 
-	err = db.DeleteRoleByUuid(uuid)
+	err = db.DeleteRoleByUuid(c, uuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), role)

@@ -17,7 +17,7 @@ import (
 type SmsService struct{}
 
 func (e *SmsService) Call(ctx context.Context, req *pb.SmsCallRequest, rsp *pb.SmsCallResponse) error {
-	logger.Infof("Received Service.Call request: %v", req)
+	logger.WithContext(ctx).Sugar().Infof("Received Service.Call request: %v", req)
 
 	code := req.Code
 	phoneNum := req.PhoneNum

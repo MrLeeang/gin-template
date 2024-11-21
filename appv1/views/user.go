@@ -23,7 +23,7 @@ func ActionLogin(c *gin.Context) {
 		return
 	}
 
-	user, err := db.QueryUserByUsername(jsonData.Username)
+	user, err := db.QueryUserByUsername(c, jsonData.Username)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, "用户不存在", map[string]interface{}{})
@@ -46,7 +46,7 @@ func ActionLogin(c *gin.Context) {
 		"token": tokenStr,
 	}
 
-	db.Add(&models.UserLoginLog{
+	db.Add(c, &models.UserLoginLog{
 		UserUuid: user.Uuid,
 		OptType:  "login",
 	})
@@ -57,14 +57,14 @@ func ActionLogin(c *gin.Context) {
 func ActionLogout(c *gin.Context) {
 	userUuid := c.Keys["Uid"].(string)
 
-	user, err := db.QueryUserByUuid(userUuid)
+	user, err := db.QueryUserByUuid(c, userUuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.Success, "", map[string]interface{}{})
 		return
 	}
 
-	db.Add(&models.UserLoginLog{
+	db.Add(c, &models.UserLoginLog{
 		UserUuid: user.Uuid,
 		OptType:  "logout",
 	})
@@ -75,7 +75,7 @@ func ActionLogout(c *gin.Context) {
 func ActionUserInfo(c *gin.Context) {
 	userUuid := c.Keys["Uid"].(string)
 
-	user, err := db.QueryUserByUuid(userUuid)
+	user, err := db.QueryUserByUuid(c, userUuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), map[string]interface{}{})
@@ -126,7 +126,7 @@ func ActionUserList(c *gin.Context) {
 
 	quryMap := map[string]string{}
 
-	userData, err := db.ListUsers(quryMap, keyword, pageInt, sizeInt)
+	userData, err := db.ListUsers(c, quryMap, keyword, pageInt, sizeInt)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), userData)
@@ -154,7 +154,7 @@ func ActionUserPut(c *gin.Context) {
 
 	uuidString := uuid.(string)
 
-	user, err := db.QueryUserByUuid(uuidString)
+	user, err := db.QueryUserByUuid(c, uuidString)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), jsonData)
@@ -164,7 +164,7 @@ func ActionUserPut(c *gin.Context) {
 	roles, ok := jsonData["roles"].([]interface{})
 
 	if ok {
-		db.Unscoped(&models.User2Role{}, "user_uuid=?", user.Uuid)
+		db.Unscoped(c, &models.User2Role{}, "user_uuid=?", user.Uuid)
 		for _, role := range roles {
 
 			roleUuid, ok := role.(string)
@@ -172,7 +172,7 @@ func ActionUserPut(c *gin.Context) {
 			if !ok || roleUuid == "" {
 				continue
 			}
-			db.Add(
+			db.Add(c,
 				&models.User2Role{
 					RoleUuid: roleUuid,
 					UserUuid: user.Uuid,
@@ -183,13 +183,13 @@ func ActionUserPut(c *gin.Context) {
 
 	delete(jsonData, "roles")
 
-	err = db.UpdateUser(user.Uuid, jsonData)
+	err = db.UpdateUser(c, user.Uuid, jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), jsonData)
 		return
 	}
 
-	user, _ = db.QueryUserByUuid(user.Uuid)
+	user, _ = db.QueryUserByUuid(c, user.Uuid)
 
 	utils.ReturnResutl(c, utils.RetCode.Success, "", user)
 }
@@ -207,14 +207,14 @@ func ActionUserPost(c *gin.Context) {
 		jsonData.Uuid = utils.GetUuid()
 	}
 
-	err := db.Add(&jsonData)
+	err := db.Add(c, &jsonData)
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), jsonData)
 		return
 	}
 
 	for _, role := range jsonData.Roles {
-		db.Add(models.User2Role{
+		db.Add(c, models.User2Role{
 			UserUuid: jsonData.Uuid,
 			RoleUuid: role.Uuid,
 		})
@@ -226,7 +226,7 @@ func ActionUserPost(c *gin.Context) {
 func ActionUserQuery(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	user, err := db.QueryUserByUuid(uuid)
+	user, err := db.QueryUserByUuid(c, uuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), user)
@@ -239,14 +239,14 @@ func ActionUserQuery(c *gin.Context) {
 func ActionUserDelete(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	user, err := db.QueryUserByUuid(uuid)
+	user, err := db.QueryUserByUuid(c, uuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.NotFoundInfo, err.Error(), user)
 		return
 	}
 
-	err = db.DeleteUserByUuid(uuid)
+	err = db.DeleteUserByUuid(c, uuid)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), user)
@@ -284,7 +284,7 @@ func ActionUserLoginLog(c *gin.Context) {
 
 	quryMap := map[string]string{}
 
-	userData, err := db.ListUserLogs(quryMap, keyword, pageInt, sizeInt)
+	userData, err := db.ListUserLogs(c, quryMap, keyword, pageInt, sizeInt)
 
 	if err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), userData)

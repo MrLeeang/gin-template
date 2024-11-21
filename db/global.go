@@ -1,22 +1,24 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"gin-template/models"
 	"gin-template/pkg/config"
 	"gin-template/pkg/utils"
 	"strings"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	gormlogger "gorm.io/gorm/logger"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
 var Session *gorm.DB
 
 // 初始化数据库连接池
-func initDb() error {
+func createSession() error {
 	dbString := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.Global.Mysql.UserName,
@@ -27,25 +29,11 @@ func initDb() error {
 	)
 
 	// 日志级别
-	logLevel := gormlogger.Warn
+	logLevel := logger.Warn
 
 	if config.Global.Debug {
-		logLevel = gormlogger.Info
+		logLevel = logger.Info
 	}
-
-	// gormLogger := gormlogger.New(
-	// 	log.New(os.Stdout, "[GORM] ", log.LstdFlags),
-	// 	gormlogger.Config{
-	// 		SlowThreshold:             2 * time.Second,
-	// 		LogLevel:                  logLevel,
-	// 		IgnoreRecordNotFoundError: true,
-	// 		Colorful:                  true,
-	// 	},
-	// )
-
-	zapLogger := NewZapLogger()
-	zapLogger.SetAsDefault() // 可选：将 zapgorm2 设置为 GORM 的默认日志记录器
-	zapLogger.LogMode(logLevel)
 
 	var err error
 
@@ -56,7 +44,11 @@ func initDb() error {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true, // 表名禁用复数
 		},
-		Logger: zapLogger,
+		Logger: zapLogger{
+			level:                     logLevel,
+			IgnoreRecordNotFoundError: false,           // 忽略not found
+			SlowThreshold:             2 * time.Second, // 慢sql
+		},
 	})
 
 	if err != nil {
@@ -158,7 +150,7 @@ func InitializeDatabase() {
 		}
 	}
 
-	if err := initDb(); err != nil {
+	if err := createSession(); err != nil {
 		if !strings.Contains(err.Error(), "Unknown database") {
 			panic(err)
 		}
@@ -168,7 +160,7 @@ func InitializeDatabase() {
 			panic(err)
 		}
 
-		if err := initDb(); err != nil {
+		if err := createSession(); err != nil {
 			panic(err)
 		}
 
@@ -178,18 +170,22 @@ func InitializeDatabase() {
 
 }
 
-func Add(model interface{}) error {
-	return Session.Create(model).Error
+func Add(ctx context.Context, model interface{}) error {
+	return Session.WithContext(ctx).Create(model).Error
 }
 
-func Delete(model interface{}, where ...interface{}) error {
-	return Session.Delete(model, where...).Error
+func Delete(ctx context.Context, model interface{}, where ...interface{}) error {
+	return Session.WithContext(ctx).Delete(model, where...).Error
 }
 
-func Unscoped(model interface{}, where ...interface{}) error {
-	return Session.Unscoped().Delete(model, where...).Error
+func Unscoped(ctx context.Context, model interface{}, where ...interface{}) error {
+	return Session.WithContext(ctx).Unscoped().Delete(model, where...).Error
 }
 
-func Save(model interface{}) error {
-	return Session.Save(model).Error
+func First(ctx context.Context, model interface{}, where ...interface{}) error {
+	return Session.WithContext(ctx).First(model, where...).Error
+}
+
+func Save(ctx context.Context, model interface{}) error {
+	return Session.WithContext(ctx).Save(model).Error
 }
