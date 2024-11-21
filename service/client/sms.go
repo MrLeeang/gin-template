@@ -6,19 +6,17 @@ import (
 )
 
 type ServiceSmsInterface interface {
-	Call(ctx context.Context, code, phoneNum string) error
+	Call(code, phoneNum string) error
 }
 
 type ServiceSmsApi struct {
-	c pb.SmsService
+	c   pb.SmsService
+	ctx context.Context
 }
 
-func (srv *ServiceSmsApi) Call(ctx context.Context, code, phoneNum string) error {
+func (srv *ServiceSmsApi) Call(code, phoneNum string) error {
 
-	c := context.Background()
-	c = context.WithValue(c, "trace_id", ctx.Value("trace_id"))
-
-	_, err := srv.c.Call(c, &pb.SmsCallRequest{Code: code, PhoneNum: phoneNum})
+	_, err := srv.c.Call(srv.ctx, &pb.SmsCallRequest{Code: code, PhoneNum: phoneNum})
 
 	return err
 }

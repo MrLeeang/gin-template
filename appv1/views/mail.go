@@ -22,8 +22,8 @@ func ActionSendMail(c *gin.Context) {
 		return
 	}
 
-	srv := client.NewService()
-	if err := srv.Mail().Call(c, params.ToAddress, params.Subject, params.Text); err != nil {
+	srv := client.NewService(c)
+	if err := srv.Mail().Call(params.ToAddress, params.Subject, params.Text); err != nil {
 		utils.ReturnResutl(c, utils.RetCode.ExceptionError, err.Error(), params)
 		return
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"gin-template/pkg/config"
 	"gin-template/pkg/logger"
@@ -9,7 +10,9 @@ import (
 
 	"github.com/go-micro/plugins/v4/registry/consul"
 	"go-micro.dev/v4"
+	"go-micro.dev/v4/metadata"
 	"go-micro.dev/v4/registry"
+	"go-micro.dev/v4/server"
 )
 
 var (
@@ -17,6 +20,21 @@ var (
 	version = "latest"
 	debug   bool
 )
+
+// 定义日志中间件
+func logMiddleware(fn server.HandlerFunc) server.HandlerFunc {
+	return func(ctx context.Context, req server.Request, rsp interface{}) error {
+
+		md, ok := metadata.FromContext(ctx)
+		if ok {
+			traceId, ok := md.Get("trace_id")
+			if ok {
+				ctx = context.WithValue(ctx, "trace_id", traceId)
+			}
+		}
+		return fn(ctx, req, rsp)
+	}
+}
 
 func main() {
 
@@ -37,6 +55,7 @@ func main() {
 		micro.Name(service),
 		micro.Version(version),
 		micro.Registry(consul.NewRegistry(registry.Addrs(config.Global.Consul.Address))),
+		micro.WrapHandler(logMiddleware), // 注册中间件,trace_id
 	)
 
 	if config.Global.Service.Address != "" {
